@@ -1,0 +1,5 @@
+public class speedy& extends Yareal{
+    public speedy&(){
+        super("Speedy & Simon", 200);
+    }
+}

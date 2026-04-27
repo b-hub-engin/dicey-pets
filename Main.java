@@ -1,5 +1,6 @@
 import java.util.Scanner;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in); 
@@ -7,7 +8,7 @@ public class Main {
         Onion onion = new Onion();
         int pet;
         
-        System.out.println("Welcome to the tommus andrew gatchy!");
+        System.out.println("Welcome to the Thomas Andrew Gatchy!");
         System.out.println("chossing between Yareal (1) and onion amberwing (2)...");
         pet = scanner.nextInt(); // Wait for user input before starting
         

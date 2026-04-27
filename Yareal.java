@@ -1,8 +1,8 @@
 public class Yareal {
     private String name;
-    private int hunger;
+    private double hunger;
     private int thirst;
-    private int happiness;
+    private double happiness;
     private int age;
     private boolean alive;
     private int turnsUntilAgeUp = 10; // Age up every 10 turns
@@ -16,23 +16,32 @@ public class Yareal {
         this.alive = true;
     }
 
-    public void update() {
+    public Yareal(String name, int happiness) {
+        this.name = name;
+        this.hunger = 100;
+        this.thirst = 100;
+        this.happiness = happiness;
+        this.age = 0;
+        this.alive = true;
+    }
+
+    public void update(double multHunger, double multHappy) {
         if (!alive)
             return;
 
-        hunger = Math.max(0, hunger - 2); // Hunger decays by 2 per turn
+        hunger = Math.max(0, hunger - 2*multHunger); // Hunger decays by 2 per turn
         if (hunger <= 50) {
-            happiness = Math.max(0, happiness - 5); // If hunger is low, happiness decays faster
-            System.out.println(name + " is getting hungry! 😟");
+            happiness = Math.max(0, happiness*multHappy - 5); // If hunger is low, happiness decays faster
+            System.out.println(name + " is getting hungry!");
         }
         thirst = Math.max(0, thirst - 3); // Thirst decays faster by 3
         if (thirst <= 50) {
-            happiness = Math.max(0, happiness - 5); // If thirst is low, happiness decays faster
-            System.out.println(name + " is getting thirsty! 😵");
+            happiness = Math.max(0, happiness - 5*multHappy); // If thirst is low, happiness decays faster
+            System.out.println(name + " is getting thirsty!");
         }
-        happiness = Math.max(0, happiness - 1 - (age / 10)); // Happiness decays, faster with age
+        happiness = Math.max(0, happiness - 1*multHappy - (age / 10)); // Happiness decays, faster with age
         if (happiness <= 50) {
-            System.out.println(name + " is feeling sad! 😢");
+            System.out.println(name + " is feeling sad!");
         }
 
         if (turnsUntilAgeUp <= 0) {
@@ -47,11 +56,47 @@ public class Yareal {
         }
     }
 
+
+
+
+    public void update() {
+        if (!alive)
+            return;
+
+        hunger = Math.max(0, hunger - 2); // Hunger decays by 2 per turn
+        if (hunger <= 50) {
+            happiness = Math.max(0, happiness - 5); // If hunger is low, happiness decays faster
+            System.out.println(name + " is getting hungry!");
+        }
+        thirst = Math.max(0, thirst - 3); // Thirst decays faster by 3
+        if (thirst <= 50) {
+            happiness = Math.max(0, happiness - 5); // If thirst is low, happiness decays faster
+            System.out.println(name + " is getting thirsty!");
+        }
+        happiness = Math.max(0, happiness - 1 - (age / 10)); // Happiness decays, faster with age
+        if (happiness <= 50) {
+            System.out.println(name + " is feeling sad!");
+        }
+
+        if (turnsUntilAgeUp <= 0) {
+            ageUp();
+            turnsUntilAgeUp = 10;
+        } else {
+            turnsUntilAgeUp--;
+        }
+
+        if (hunger <= 0 || thirst <= 0 || happiness <= 0) {
+            alive = false;
+        }
+    }
+
+
+
     public void feed() {
         if (alive) {
             hunger = Math.min(100, hunger + 30);
             if (hunger > 80) {
-                System.out.println(name + " is getting full! 🍽️");
+                System.out.println(name + " is getting full!");
                 happiness = Math.max(0, happiness - 5); // Overfeeding reduces happiness
             }
             happiness = Math.min(100, happiness + 10);
@@ -62,7 +107,7 @@ public class Yareal {
         if (alive) {
             thirst = Math.min(100, thirst + 40);
             if (thirst > 80) {
-                System.out.println(name + " is getting overhydrated! 🚰");
+                System.out.println(name + " is getting overhydrated!");
                 happiness = Math.max(0, happiness - 5); // Overhydration reduces happiness
             }
             happiness = Math.min(100, happiness + 10);
@@ -73,7 +118,7 @@ public class Yareal {
         if (alive) {
             happiness = Math.min(100, happiness + 25);
             if (happiness > 80) {
-                System.out.println(name + " is having a great time! 😄");
+                System.out.println(name + " is having a great time!");
                 hunger = Math.max(0, hunger + 5); // Playing more negates costs
                 thirst = Math.max(0, thirst + 5);
             }
@@ -114,7 +159,7 @@ public class Yareal {
 
     public String getStatus() {
         if (!alive)
-            return name + " is dead. 💀";
+            return name + " is dead.";
         return String.format("%s: Age %d days | Hunger %d%% | Thirst %d%% | Happiness %d%%", name, age, hunger, thirst,
                 happiness);
     }

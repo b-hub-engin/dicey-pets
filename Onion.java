@@ -1,19 +1,8 @@
-public class Onion {
-    private String name;
-    private int hunger;
-    private int thirst;
-    private int happiness;
-    private int age;
-    private boolean alive;
-    private int turnsUntilAgeUp = 10; // Age up every 10 turns
+public class Onion extends Yareal {
+
 
     public Onion() {
-        this.name = "onion amberwing";
-        this.hunger = 100;
-        this.thirst = 100;
-        this.happiness = 100;
-        this.age = 0;
-        this.alive = true;
+       super("Onion Emberwind", 100);
     }
 
     public void update() {

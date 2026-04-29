@@ -1,9 +1,12 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
 public class BlackJack{
-    ArrayList <String> cards;
-    ArrayList<String> playerCards;
-    ArrayList<String> diceCards;
+    ArrayList <String> cards = new ArrayList<>();
+    ArrayList<String> playerCards = new ArrayList<>();
+    ArrayList<String> diceCards = new ArrayList<>();
+    public static Scanner scanBot = new Scanner(System.in);
     public BlackJack(){
-        cards = new ArrayList<String>;
         for(int i= 0; i<4; i++){
             cards.add("Ace");
             cards.add("2");
@@ -19,16 +22,43 @@ public class BlackJack{
             cards.add("Queen");
             cards.add("King");
         }
-        playerCards = new ArrayList<String>;
-        diceCards = new ArrayList<String>;
+        System.out.print("You drew ");
         for(int i = 0; i<2; i++){
             playerCards.add(drawCard());
             diceCards.add(drawCard());
         }
+        if( playerCards.get(0).equals(playerCards.get(1))){
+            System.out.println("two "+playerCards.get(0)+"s");
+        }
+        else{
+            if(playerCards.get(0).equals("8")||playerCards.get(0).equals("Ace")){
+                System.out.print("an "+ playerCards.get(0));
+            }
+            else{
+                System.out.print("a "+playerCards.get(0));
+            }
+
+            if(playerCards.get(1).equals("8")||playerCards.get(1).equals("Ace")){
+                System.out.println("an "+ playerCards.get(1));
+            }
+            else{
+                System.out.println("a "+playerCards.get(1));
+            }
+        }
+
     }
 
+   
+
     public boolean hit(ArrayList<String> guysCards){
-        guysCards.add(drawCard());
+        String newCard = drawCard();
+        guysCards.add(newCard);
+        if(newCard.equals("8")||newCard.equals("Ace")){
+            System.out.println("You drew an "+newCard);
+        }
+        else{
+            System.out.println("You drew a "+ newCard);
+        }
         if(getScore(guysCards)>21){
             return false;
         }
@@ -70,7 +100,7 @@ public class BlackJack{
         }
         int smallAce =0;
         for ( int i = aceCount; i>0; i++){
-            if(total+11*i)>21{
+            if(total+11*i>21){
                 smallAce +=1;
                 aceCount-=1;
             }
@@ -81,8 +111,25 @@ public class BlackJack{
     }
 
     public String drawCard(){
-        return(cards.remove(Math.random()*cards.size()));
+        int cardNum = (int)(Math.random()*cards.size());
+        String card = cards.get(cardNum);
+        cards.remove(cardNum);
+        return(card);
     }
 
+    public void playBlackJack(int charNum){
+        boolean keepPlaying = true;
+        while(keepPlaying){
+           BlackJack currentGame = new BlackJack(); 
+           boolean inputWorks = false;
+           while(!inputWorks){
+            System.out.println("[H] hit or [S] stand");
+                if(scanBot.nextLine().toUpperCase().equals("H")){
+                    
+                }
+           }
+           System.out.println("\nPlay again?\n[Y]: yes    [N]: no");
+        }
 
+    }
 }

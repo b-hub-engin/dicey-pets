@@ -1,3 +1,4 @@
+import java.util.Scanner;
 public class Yareal {
     private String name;
     private double hunger;
@@ -6,17 +7,17 @@ public class Yareal {
     private int age;
     private boolean alive;
     private int turnsUntilAgeUp = 10; // Age up every 10 turns
-
+    Scanner scanner = new Scanner(System.in); 
     public Yareal() {
         this.name = "Yareal";
-        this.hunger = 100;
+        this.hunger = 100.0;
         this.thirst = 100;
-        this.happiness = 100;
+        this.happiness = 100.0;
         this.age = 0;
         this.alive = true;
     }
 
-    public Yareal(String name, int happiness) {
+    public Yareal(String name, double happiness) {
         this.name = name;
         this.hunger = 100;
         this.thirst = 100;
@@ -116,6 +117,21 @@ public class Yareal {
 
     public void play() {
         if (alive) {
+            System.out.println("what game do you want to play");
+            System.out.println("blackjack(1)/nCup&Ball(2)");
+            int game = scanner.nextInt();
+            switch(game){
+            case 1:
+            System.out.println("who are you playing against");
+            System.out.println("Yereal(1)/nSpeedy&Simon(2)/nCrawler(3)/nOnion");
+            int opp = scanner.nextInt();
+            
+            case 2:
+            System.out.println("who are you playing against");
+            System.out.println("Yereal(1)/nSpeedy&Simon(2)/nCrawler(3)/nOnion(4)");
+            int op = scanner.nextInt();
+
+            }
             happiness = Math.min(100, happiness + 25);
             if (happiness > 80) {
                 System.out.println(name + " is having a great time!");
@@ -137,7 +153,7 @@ public class Yareal {
         return name;
     }
 
-    public int getHunger() {
+    public double getHunger() {
         return hunger;
     }
 
@@ -145,7 +161,7 @@ public class Yareal {
         return thirst;
     }
 
-    public int getHappiness() {
+    public double getHappiness() {
         return happiness;
     }
 

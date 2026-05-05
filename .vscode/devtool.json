@@ -1,0 +1,13 @@
+{
+    "name": "Dicey Pets",
+    "image": "mcr.microsoft.com/devcontainers/java:17",
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y ttyd && javac *.java",
+    "forwardPorts": [8080],
+    "portsAttributes": {
+        "8080": {
+            "label": "Dicey Pets",
+            "onAutoForward": "openBrowser"
+        }
+    },
+    "postStartCommand": "ttyd -p 8080 java Main"
+}

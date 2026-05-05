@@ -1,173 +1,147 @@
-import java.util.Scanner;
-
 public class Yareal {
+
+    // --- Constants ---
+    private static final double DECAY_RATE    = 1.5;  // base stat loss per turn
+    private static final double WARN_RATIO    = 0.40; // warn when stat drops below 40% of max
+    private static final double FULL_RATIO    = 0.85; // penalty triggers if already above 85% when gaining
+    private static final double FEED_GAIN     = 15.0; // how much feed/drink restores
+    private static final double FEED_HAPPY    = 5.0;  // happiness gained from feeding/drinking
+    private static final double OVERFLOW_HIT  = 5.0;  // happiness lost from overfeeding/overdrinking/overplaying
+    private static final double PLAY_GAIN     = 10.0; // happiness gained from playing
+    private static final double PLAY_COST     = 3.0;  // hunger/thirst lost from playing
+    private static final double PLAY_OVER_COST= 5.0;  // extra cost when playing at max happiness
+    private static final double AGE_HIT       = 5.0;  // happiness lost per age-up
+    private static final double AGE_DECAY_INC = 0.05; // how much harder the game gets per age
+    private static final int    AGE_INTERVAL  = 10;   // turns between age-ups
+
+    // --- Fields ---
     private String name;
     private double hunger;
-    private int thirst;
+    private double thirst;
     private double happiness;
-    private int age;
+    private int    age;
     private double multHunger;
     private double multHappy;
+    private double multthirst;
+    private double agedecay;
     private boolean alive;
-    private int turnsUntilAgeUp = 10;
+    private int turnsUntilAgeUp = AGE_INTERVAL;
 
+    // --- Constructors ---
     public Yareal() {
-        this.name = "Yareal";
-        this.hunger = 100.0;
-        this.thirst = 100;
-        this.happiness = 100.0;
-        this.age = 0;
-        this.alive = true;
-        this.multHunger = 1.0;
-        this.multHappy = 1.0;
+        this("Yareal", 100.0, 100.0, 100.0, 1.0, 1.0, 1.0);
     }
 
-    public Yareal(String name, double happiness, double hunger, int thirst, double multHunger, double multHappy) {
-        this.name = name;
-        this.hunger = hunger;
-        this.thirst = thirst;
-        this.happiness = happiness;
-        this.age = 0;
-        this.alive = true;
+    public Yareal(String name, double basehunger, double basethirst, double basehappy,
+                  double multHunger, double multHappy, double multthirst) {
+        this.name       = name;
+        this.hunger     = basehunger;
+        this.thirst     = basethirst;
+        this.happiness  = basehappy;
+        this.age        = 0;
+        this.alive      = true;
         this.multHunger = multHunger;
-        this.multHappy = multHappy;
+        this.multHappy  = multHappy;
+        this.multthirst = multthirst;
+        this.agedecay   = 0.5;
     }
 
-    // Parameterized update used by subclasses with different decay rates
-    public void update(double multHunger, double multHappy) {
-        if (!alive)
-            return;
+    // --- Private helpers ---
 
-        hunger = Math.max(0, hunger - 2 * multHunger);
-        if (hunger <= 50) {
-            happiness = Math.max(0, happiness - 5 * multHappy); // FIX: was multiplicative (happiness*multHappy - 5), now consistent with no-arg version
-            System.out.println(name + " is getting hungry!");
+    // Decays a stat and reduces happiness + prints a warning if it falls below 40% of max
+    private double decayAndWarn(double stat, double mult, String warning) {
+        double result = Math.max(0, stat - (DECAY_RATE * mult) - agedecay);
+        if (result <= WARN_RATIO * 100 * mult) {
+            happiness = Math.max(0, happiness - (OVERFLOW_HIT * multHappy));
+            System.out.println(name + warning);
         }
-
-        thirst = Math.max(0, thirst - 3);
-        if (thirst <= 50) {
-            happiness = Math.max(0, happiness - 5 * multHappy);
-            System.out.println(name + " is getting thirsty!");
-        }
-
-        happiness = Math.max(0, happiness - 1 * multHappy - (age / 10));
-        if (happiness <= 50) {
-            System.out.println(name + " is feeling sad!");
-        }
-
-        if (turnsUntilAgeUp <= 0) {
-            ageUp();
-            turnsUntilAgeUp = 10;
-        } else {
-            turnsUntilAgeUp--;
-        }
-
-        if (hunger <= 0 || thirst <= 0 || happiness <= 0) {
-            alive = false;
-        }
+        return result;
     }
 
+    // Adds to a stat, caps at max, and penalises happiness only if already nearly full before the gain
+    private double gainStat(double stat, double mult, double gain, String overflowMsg) {
+        boolean nearFull = stat >= FULL_RATIO * 100 * mult;
+        stat += gain;
+        if (stat > 100 * mult) {
+            stat = 100 * mult;
+            if (nearFull) {
+                happiness = Math.max(0, happiness - (OVERFLOW_HIT * multHappy));
+                System.out.println(name + overflowMsg);
+            }
+        }
+        return stat;
+    }
+
+    // --- Public methods ---
     public void update() {
-        if (!alive)
-            return;
+        if (!alive) return;
 
-        hunger = Math.max(0, this.hunger - 2);
-        if (hunger <= 50) {
-            happiness = Math.max(0, this.happiness - 5);
-            System.out.println(name + " is getting hungry!");
-        }
+        hunger    = decayAndWarn(hunger, multHunger, " is getting hungry!");
+        thirst    = decayAndWarn(thirst, multthirst, " is getting thirsty!");
 
-        thirst = Math.max(0, this.thirst - 3);
-        if (thirst <= 50) {
-            happiness = Math.max(0, this.happiness - 5);
-            System.out.println(name + " is getting thirsty!");
-        }
-
-        happiness = Math.max(0, this.happiness - 1 - (age / 10));
-        if (happiness <= 50) {
+        // Happiness decay doesn't further reduce happiness on warn — handled separately
+        happiness = Math.max(0, happiness - (DECAY_RATE * multHappy) - agedecay);
+        if (happiness <= WARN_RATIO * 100 * multHappy)
             System.out.println(name + " is feeling sad!");
-        }
 
         if (turnsUntilAgeUp <= 0) {
             ageUp();
-            turnsUntilAgeUp = 10;
+            turnsUntilAgeUp = AGE_INTERVAL;
         } else {
             turnsUntilAgeUp--;
         }
 
-        if (hunger <= 0 || thirst <= 0 || happiness <= 0) {
+        if (hunger <= 0 || thirst <= 0 || happiness <= 0)
             alive = false;
-        }
     }
 
     public void feed() {
-        if (alive) {
-            hunger = Math.min(100, this.hunger + 30);
-            if (hunger > 80) {
-                System.out.println(name + " is getting full!");
-                happiness = Math.max(0, this.happiness - 5);
-            }
-            happiness = Math.min(100, this.happiness + 10);
-        }
+        if (!alive) return;
+        hunger    = gainStat(hunger, multHunger, FEED_GAIN * multHunger, " is too full!");
+        happiness = Math.min(100 * multHappy, happiness + FEED_HAPPY * multHappy);
     }
 
     public void drink() {
-        if (alive) {
-            thirst = Math.min(100, this.thirst + 40);
-            if (thirst > 80*thirst/100) { // FIX: was just thirst > 80, now also considers hunger to avoid overhydration when very hungry
-                System.out.println(name + " is getting overhydrated!");
-                happiness = Math.max(0, this.happiness - 5);
-            }
-            happiness = Math.min(100, this.happiness + 10);
-        }
+        if (!alive) return;
+        thirst    = gainStat(thirst, multthirst, FEED_GAIN * multthirst, " is overhydrated!");
+        happiness = Math.min(100 * multHappy, happiness + FEED_HAPPY * multHappy);
     }
 
     public void play() {
-        if (alive) {
-            happiness = Math.min(100, this.happiness + 25);
-            if (happiness > 80) {
+        if (!alive) return;
+        boolean alreadyHappy = happiness >= FULL_RATIO * 100 * multHappy;
+        happiness += PLAY_GAIN * multHappy;
+        if (happiness > 100 * multHappy) {
+            happiness = 100 * multHappy;
+            if (alreadyHappy) {
+                hunger = Math.max(0, hunger - (PLAY_OVER_COST * multHunger));
+                thirst = Math.max(0, thirst - (PLAY_OVER_COST * multthirst));
                 System.out.println(name + " is having a great time!");
-            } else {
-                hunger = Math.max(0, this.hunger - 5);
-                thirst = Math.max(0, this.thirst - 5);
             }
         }
+        hunger = Math.max(0, hunger - (PLAY_COST * multHunger));
+        thirst = Math.max(0, thirst - (PLAY_COST * multthirst));
     }
 
     private void ageUp() {
         age++;
-        happiness = Math.max(0, happiness - 5);
+        happiness = Math.max(0.0, happiness - (AGE_HIT * multHappy));
+        agedecay += AGE_DECAY_INC;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public double getHunger() {
-        return hunger;
-    }
-
-    public int getThirst() {
-        return thirst;
-    }
-
-    public double getHappiness() {
-        return happiness;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public boolean isAlive() {
-        return alive;
-    }
+    // --- Getters ---
+    public String  getName()      { return name; }
+    public double  getHunger()    { return hunger; }
+    public double  getThirst()    { return thirst; }
+    public double  getHappiness() { return happiness; }
+    public int     getAge()       { return age; }
+    public boolean isAlive()      { return alive; }
 
     public String getStatus() {
-        if (!alive)
-            return name + " is dead.";
+        if (!alive) return name + " is dead.";
+        // hunger/multHunger gives 0-100% normalized — simplified from (hunger/(100*mult))*100
         return String.format(
-                "%s: age %d | Hunger %.0f%% | Thirst %d%% | Happiness %.0f%%",
-                name, age, hunger, thirst, happiness);
+                "%s: age %d | Hunger %.0f%% | Thirst %.0f%% | Happiness %.0f%%",
+                name, age, hunger/multHunger, thirst/multthirst, happiness/multHappy);
     }
 }

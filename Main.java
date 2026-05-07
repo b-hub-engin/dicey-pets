@@ -90,12 +90,18 @@ public class Main {
                             break;
                         case 2:
                             cupandball cupandball = new cupandball();
-                            System.out.println("Guess which cup the ball is under! (1, 2, or 3)");
                             int guess = scanner.nextInt();
                             scanner.nextLine();
                             cupandball.guess(guess);
-                            pet.play();
+                            if (lastWon == true){
+                            pet.play();}
                             break;
+                        case 3:{
+                            BattleShip.playBattleShip(name);
+                            for (int i = 0; i < BlackJack.getRuns(); i++) {
+                                pet.play();
+                            }
+                        }
                         default:
                             System.out.println("Invalid input.");
                     }
